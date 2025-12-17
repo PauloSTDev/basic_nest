@@ -1,42 +1,45 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put } from "@nestjs/common";
 import { CreateUserDTO } from "./dto/create-user-dto";
 import { UpdatePutUserDTO } from "./dto/update-put-user-dto copy";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user-dto";
+import { UserService } from "./user.service";
 
 @Controller('users')
 export class UserController {
 
+    constructor(private readonly userService: UserService) {}
+
     // CREATE
     @Post()
-    async createUser(@Body() {email, name, password}, body: CreateUserDTO) {
-        return { email, name, password, body, message: 'User created successfully' };
+    async createUser(@Body() data: CreateUserDTO) {
+        return this.userService.create(data);
     }
 
     // READ
     @Get()
     async list() {
-        return [];
+        return this.userService.listAll();
     }
 
     @Get(':id')
-    async getOne(@Param('id') param) {
-        return {user:{}, param};
+    async getUserById(@Param('id', ParseIntPipe) id: number) {
+        return this.userService.getUserById(id);
     }
 
     // UPDATE
     @Put(':id')
-    async update(@Body() {email, name, password}: UpdatePutUserDTO, @Param() params) {
-        return {method: 'PUT', message: 'User updated successfully', email, name, password, params};
+    async update(@Body() data: UpdatePutUserDTO, @Param('id', ParseIntPipe) id: number) {
+       return  this.userService.updateUser(id, data);
     }
 
     @Patch(':id')
-    async updatePartial(@Body(){email, name, password}: UpdatePatchUserDTO, @Param() params) {
-        return {method: 'PATCH', message: 'User updated successfully', email, name, password, params};
+    async updatePartial(@Body() data: UpdatePatchUserDTO, @Param('id', ParseIntPipe) id: number) {
+        return this.userService.updateUserPartial(id, data);
     }
 
     // DELETE
     @Delete(':id')
-    async deleteUser(@Param() params) {
-        return {method: 'DELETE', message: 'User deleted successfully', params};
+    async deleteUser(@Param('id', ParseIntPipe) id: number) {
+        return this.userService.deleteUserById(id);
     }
 }
